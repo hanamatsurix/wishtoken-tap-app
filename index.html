@@ -38,6 +38,43 @@
             z-index: 0;
         }
         
+        .game-notice {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1002;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .currency-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.95);
+            border: 2px solid #B8860B;
+            border-radius: 12px;
+            padding: 12px;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .currency-selector select {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            cursor: pointer;
+            outline: none;
+        }
+        
         .score-container {
             position: fixed;
             bottom: 0;
@@ -232,6 +269,21 @@
             body {
                 background-size: cover;
             }
+            
+            .currency-selector {
+                top: 15px;
+                right: 15px;
+                padding: 8px;
+            }
+            
+            .currency-selector select {
+                font-size: 14px;
+            }
+            
+            .game-notice {
+                font-size: 12px;
+                padding: 6px 15px;
+            }
         }
         
         @media (min-width: 769px) {
@@ -243,6 +295,21 @@
     </style>
 </head>
 <body>
+    <div class="game-notice">
+        🎮 FOR ENTERTAINMENT ONLY 🎮
+    </div>
+    
+    <div class="currency-selector">
+        <select id="currencySelector">
+            <option value="jpy">💴 JPY</option>
+            <option value="usd">💵 USD</option>
+            <option value="eur">💶 EUR</option>
+            <option value="gbp">💷 GBP</option>
+            <option value="btc">🪙 BTC</option>
+            <option value="gold">💎 GOLD</option>
+        </select>
+    </div>
+
     <audio id="coinSound" preload="auto">
         <source src="charin.mp3" type="audio/mpeg">
         <source src="charin.wav" type="audio/wav">
@@ -250,21 +317,56 @@
     </audio>
     
     <div class="score-container">
-        <div class="score-label">✨ WishTokens ✨</div>
-        <div class="score-value" id="scoreDisplay">0</div>
+        <div class="score-label" id="scoreLabel">📈 投資資金 📈</div>
+        <div class="score-value" id="scoreDisplay">¥0</div>
     </div>
     
     <script>
         let currentScore = 0;
-        const scorePerClick = 10;
+        let currentCurrency = 'jpy';
         let isProcessing = false;
         let isTouchDevice = false;
 
+        const currencies = {
+            jpy: { symbol: '¥', increment: 10000, label: '📈 投資資金 📈' },
+            usd: { symbol: '$', increment: 100, label: '💰 Investment Fund 💰' },
+            eur: { symbol: '€', increment: 85, label: '💰 Fonds d\'investissement 💰' },
+            gbp: { symbol: '£', increment: 75, label: '💰 Investment Fund 💰' },
+            btc: { symbol: '₿', increment: 0.001, label: '🪙 Bitcoin Wallet 🪙', decimals: 3 },
+            gold: { symbol: '', increment: 1, label: '💎 Gold Reserve 💎', suffix: 'g' }
+        };
+
         function updateScore() {
-            currentScore += scorePerClick;
-            document.getElementById('scoreDisplay').textContent = 
-                currentScore.toLocaleString();
+            const currency = currencies[currentCurrency];
+            currentScore += currency.increment;
+            
+            let displayValue;
+            if (currency.decimals) {
+                displayValue = currentScore.toFixed(currency.decimals);
+            } else {
+                displayValue = Math.floor(currentScore).toLocaleString();
+            }
+            
+            const formatted = currency.symbol + displayValue + (currency.suffix || '');
+            document.getElementById('scoreDisplay').textContent = formatted;
         }
+
+        function changeCurrency(newCurrency) {
+            const oldCurrency = currencies[currentCurrency];
+            const newCurrencyData = currencies[newCurrency];
+            
+            // 換算（簡単な比率計算）
+            const ratio = newCurrencyData.increment / oldCurrency.increment;
+            currentScore = currentScore * ratio;
+            
+            currentCurrency = newCurrency;
+            document.getElementById('scoreLabel').textContent = newCurrencyData.label;
+            updateScore();
+        }
+
+        document.getElementById('currencySelector').addEventListener('change', function(e) {
+            changeCurrency(e.target.value);
+        });
 
         function createGoldSparkleEffect(x, y) {
             const particleCount = 30 + Math.floor(Math.random() * 20);
@@ -381,6 +483,7 @@
 
         window.addEventListener('load', function() {
             console.log('WishToken Tap App loaded!');
+            updateScore(); // 初期表示
         });
     </script>
 </body>
