@@ -38,21 +38,6 @@
             z-index: 0;
         }
         
-        .game-notice {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 1002;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        }
-        
         .currency-selector {
             position: fixed;
             top: 20px;
@@ -100,6 +85,14 @@
             font-size: 48px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .game-notice {
+            font-size: 14px;
+            color: #FFB6C1;
+            opacity: 0.8;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
         
         .gold-particle {
@@ -266,6 +259,10 @@
                 font-size: 40px;
             }
             
+            .game-notice {
+                font-size: 12px;
+            }
+            
             body {
                 background-size: cover;
             }
@@ -279,11 +276,6 @@
             .currency-selector select {
                 font-size: 14px;
             }
-            
-            .game-notice {
-                font-size: 12px;
-                padding: 6px 15px;
-            }
         }
         
         @media (min-width: 769px) {
@@ -295,18 +287,14 @@
     </style>
 </head>
 <body>
-    <div class="game-notice">
-        🎮 FOR ENTERTAINMENT ONLY 🎮
-    </div>
-    
     <div class="currency-selector">
         <select id="currencySelector">
-            <option value="jpy">💴 JPY</option>
-            <option value="usd">💵 USD</option>
-            <option value="eur">💶 EUR</option>
-            <option value="gbp">💷 GBP</option>
-            <option value="btc">🪙 BTC</option>
-            <option value="gold">💎 GOLD</option>
+            <option value="wish">✨ Wish Tokens</option>
+            <option value="dream">💫 Dream Tokens</option>
+            <option value="star">⭐ Star Tokens</option>
+            <option value="magic">🔮 Magic Tokens</option>
+            <option value="gold">🪙 Gold Tokens</option>
+            <option value="crystal">💎 Crystal Tokens</option>
         </select>
     </div>
 
@@ -317,47 +305,38 @@
     </audio>
     
     <div class="score-container">
-        <div class="score-label" id="scoreLabel">📈 投資資金 📈</div>
-        <div class="score-value" id="scoreDisplay">¥0</div>
+        <div class="score-label" id="scoreLabel">✨ Wish Tokens ✨</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+        <div class="game-notice">🎮 FOR ENTERTAINMENT ONLY 🎮</div>
     </div>
     
     <script>
         let currentScore = 0;
-        let currentCurrency = 'jpy';
+        let currentCurrency = 'wish';
         let isProcessing = false;
         let isTouchDevice = false;
 
         const currencies = {
-            jpy: { symbol: '¥', increment: 10000, label: '📈 投資資金 📈' },
-            usd: { symbol: '$', increment: 100, label: '💰 Investment Fund 💰' },
-            eur: { symbol: '€', increment: 85, label: '💰 Fonds d\'investissement 💰' },
-            gbp: { symbol: '£', increment: 75, label: '💰 Investment Fund 💰' },
-            btc: { symbol: '₿', increment: 0.001, label: '🪙 Bitcoin Wallet 🪙', decimals: 3 },
-            gold: { symbol: '', increment: 1, label: '💎 Gold Reserve 💎', suffix: 'g' }
+            wish: { increment: 10, label: '✨ Wish Tokens ✨' },
+            dream: { increment: 5, label: '💫 Dream Tokens 💫' },
+            star: { increment: 1, label: '⭐ Star Tokens ⭐' },
+            magic: { increment: 25, label: '🔮 Magic Tokens 🔮' },
+            gold: { increment: 2, label: '🪙 Gold Tokens 🪙' },
+            crystal: { increment: 1, label: '💎 Crystal Tokens 💎' }
         };
 
         function updateScore() {
             const currency = currencies[currentCurrency];
             currentScore += currency.increment;
-            
-            let displayValue;
-            if (currency.decimals) {
-                displayValue = currentScore.toFixed(currency.decimals);
-            } else {
-                displayValue = Math.floor(currentScore).toLocaleString();
-            }
-            
-            const formatted = currency.symbol + displayValue + (currency.suffix || '');
-            document.getElementById('scoreDisplay').textContent = formatted;
+            document.getElementById('scoreDisplay').textContent = currentScore.toLocaleString();
         }
 
         function changeCurrency(newCurrency) {
             const oldCurrency = currencies[currentCurrency];
             const newCurrencyData = currencies[newCurrency];
             
-            // 換算（簡単な比率計算）
             const ratio = newCurrencyData.increment / oldCurrency.increment;
-            currentScore = currentScore * ratio;
+            currentScore = Math.floor(currentScore * ratio);
             
             currentCurrency = newCurrency;
             document.getElementById('scoreLabel').textContent = newCurrencyData.label;
@@ -483,7 +462,7 @@
 
         window.addEventListener('load', function() {
             console.log('WishToken Tap App loaded!');
-            updateScore(); // 初期表示
+            updateScore();
         });
     </script>
 </body>
